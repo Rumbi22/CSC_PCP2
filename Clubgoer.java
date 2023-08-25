@@ -22,7 +22,9 @@ public class Clubgoer extends Thread {
 	private boolean thirsty;
 	private boolean wantToLeave;
 	
-	private int ID; //thread ID 
+	private int ID; //thread ID
+
+	private AtomicBoolean isPaused = new AtomicBoolean(false);
 
 	
 	Clubgoer( int ID,  PeopleLocation loc,  int speed) {
@@ -36,7 +38,7 @@ public class Clubgoer extends Thread {
 	}
 	
 	//getter
-	public synchronized boolean inRoom() {
+	public  boolean inRoom() {
 		return inRoom;
 	}
 	
@@ -50,10 +52,29 @@ public class Clubgoer extends Thread {
 	public   int getSpeed() { return movingSpeed; }
 
 	//setter
+	public void pauseSimulation() {
+		isPaused.set(true);
+
+	}
+
+	public void resumeSimulation() {
+		isPaused.set(false);
+	}
 
 	//check to see if user pressed pause button
-	private void checkPause() {
-		// THIS DOES NOTHING - MUST BE FIXED  	
+	public void checkPause() {
+		// THIS DOES NOTHING - MUST BE FIXED
+		if (isPaused.get()) {
+			pauseSimulation();
+			while (isPaused.get()) {
+				try {
+					sleep(100); // Sleep while paused
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+
+		}else resumeSimulation();
         
     }
 	public void setCurrentBlock(GridBlock block) {

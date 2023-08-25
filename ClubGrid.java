@@ -81,20 +81,14 @@ public class ClubGrid {
 	}
 
 	public GridBlock enterClub(PeopleLocation myLocation) throws InterruptedException {
-		if (!counter.overCapacity()) {enter.lock(); // Lock the entrance method
 
-		try {
-			while (!entrance.get(myLocation.getID()) || counter.overCapacity()) {
-				// Patron waits until the entrance block is available and there is space
-				wait();
-			}
+
 			counter.personArrived(); // Add to counter of people waiting
 			counter.personEntered(); // Add to counter
+			while(counter.getInside()== counter.getMax()){}
 			myLocation.setLocation(entrance);
 			myLocation.setInRoom(true);
-		} finally {
-			enter.unlock(); // Release the block's lock after entering
-		}}
+
 
 		return entrance;
 	}

@@ -2,6 +2,8 @@
 
 package clubSimulation;
 // the main class, starts all threads
+import jdk.swing.interop.SwingInterOpUtils;
+
 import javax.swing.*;
 
 import java.awt.Color;
@@ -74,10 +76,8 @@ public class ClubSimulation {
 		    public void actionPerformed(ActionEvent e)  {
 			    	  	// THIS DOES NOTHING - MUST BE FIXED
 				System.out.println("Start button pressed.");
-
-
 				startButton.countDown();
-				pauseButton = new CountDownLatch(0); // Reset the pauseLatch
+				//pauseButton = new CountDownLatch(0); // Reset the pauseLatch
 
 				System.out.println("Start latch released. Starting simulation...");
 
@@ -94,23 +94,27 @@ public class ClubSimulation {
 		      public void actionPerformed(ActionEvent e) {
 		    		// THIS DOES NOTHING - MUST BE FIXED
 
+
+				  System.out.println("Pause button pressed.");
 				  if (isPaused.get()) {
 					  // Resume the simulation
 					  isPaused.set(false);
 					  pauseB.setText("Pause");
-					  pauseButton.countDown(); // Release the start latch to resume threads
 				  } else {
 					  // Pause the simulation
 					  isPaused.set(true);
 					  pauseB.setText("Resume");
-					  // Block new threads from starting until the latch is released
-					  pauseButton = new CountDownLatch(1);
 				  }
 
-				  // Iterate through all the patron threads and pause them
+				  // Toggle pause state for all patron threads
 				  for (Clubgoer patron : patrons) {
-					  //patron.pauseThread();
+					  if (isPaused.get()) {
+						  patron.pauseSimulation();
+					  } else {
+						  patron.resumeSimulation();
+					  }
 				  }
+
 
 
 			  }
@@ -163,7 +167,7 @@ public class ClubSimulation {
 		Random rand = new Random();
 
         for (int i=0;i<noClubgoers;i++) {
-        		peopleLocations[i]=new PeopleLocation(i);
+        		peopleLocations[i]=new PeopleLocation(i,tallys);
         		int movingSpeed=(int)(Math.random() * (maxWait-minWait)+minWait); //range of speeds for customers
     			patrons[i] = new Clubgoer(i,peopleLocations[i],movingSpeed);
     		}
