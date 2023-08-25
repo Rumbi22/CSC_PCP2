@@ -52,6 +52,7 @@ public class Clubgoer extends Thread {
 	public   int getSpeed() { return movingSpeed; }
 
 	//setter
+//setter
 	public void pauseSimulation() {
 		isPaused.set(true);
 
@@ -75,8 +76,8 @@ public class Clubgoer extends Thread {
 			}
 
 		}else resumeSimulation();
-        
-    }
+
+	}
 	public void setCurrentBlock(GridBlock block) {
 		currentBlock = block;
 	}
@@ -84,14 +85,14 @@ public class Clubgoer extends Thread {
 
 	private void startSim() {
 		// THIS DOES NOTHING - MUST BE FIXED
-			try {
-				ClubSimulation.startButton.await(); // Wait until the latch is released
+		try {
+			ClubSimulation.startButton.await(); // Wait until the latch is released
 
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 
-    }
+	}
 	
 	//get drink at bar
 		private void getDrink() throws InterruptedException {

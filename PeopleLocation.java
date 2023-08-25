@@ -11,7 +11,6 @@ public class PeopleLocation  { // this is a separate class so don't have to acce
 	private AtomicBoolean inRoom; //are they in the club?
 	private AtomicBoolean arrived; //have they arrived at the club?
 	private GridBlock location; //which GridBlock are they on?
-	private PeopleCounter newCounter;
 	
 	PeopleLocation(int ID ) {
 		Random rand = new Random();
@@ -21,20 +20,10 @@ public class PeopleLocation  { // this is a separate class so don't have to acce
 		arrived = new AtomicBoolean(false); //have not arrive outside
 		this.ID=ID;
 	}
-	PeopleLocation(int ID, PeopleCounter counter ) {
-		Random rand = new Random();
-		float c = rand.nextFloat(); //bit of a hack to get different colours
-		myColor = new Color(c, rand.nextFloat(), c);	//only set at beginning	by thread
-		inRoom = new AtomicBoolean(false); //not in club
-		arrived = new AtomicBoolean(false); //have not arrive outside
-		this.ID=ID;
-		newCounter=counter;
-	}
 	
 	//setter
 	public  void setInRoom(boolean in) {
-		if (newCounter.overCapacity()==false){
-		this.inRoom.set(in);}
+		this.inRoom.set(in);
 	}
 	
 	//getter and setter
@@ -42,8 +31,7 @@ public class PeopleLocation  { // this is a separate class so don't have to acce
 		return arrived.get();
 	}
 	public void setArrived() {
-		this.arrived.set(true);
-		newCounter.personArrived();
+		this.arrived.set(true);;
 	}
 
 //getter and setter

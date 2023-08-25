@@ -3,9 +3,9 @@
 
 package clubSimulation;
 
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Lock;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.Lock;
 
 //This class represents the club as a grid of GridBlocks
 public class ClubGrid {
@@ -18,14 +18,10 @@ public class ClubGrid {
 	private GridBlock entrance; //hard coded entrance
 	private final static int minX =5;//minimum x dimension
 	private final static int minY =5;//minimum y dimension
-
-	private static Lock entranceLock = new ReentrantLock(); // Lock for entrance door
-	private static Lock exitLock = new ReentrantLock();     // Lock for exit door
-	private static Lock leaveLock = new ReentrantLock();
-
-	private Lock enter= new ReentrantLock();
-	
 	private PeopleCounter counter;
+	private Semaphore enter;
+
+
 	
 	ClubGrid(int x, int y, int [] exitBlocks,PeopleCounter c) throws InterruptedException {
 		if (x<minX) x=minX; //minimum x
@@ -37,6 +33,7 @@ public class ClubGrid {
 		this.initGrid(exitBlocks);
 		entrance=Blocks[getMaxX()/2][0];
 		counter=c;
+		enter= new Semaphore(counter.getMax());
 		}
 	
 	//initialise the grsi, creating all the GridBlocks
@@ -79,25 +76,23 @@ public class ClubGrid {
 			return false;
 		return true;
 	}
+	
+	public  GridBlock enterClub(PeopleLocation myLocation) throws InterruptedException  {
 
-	public GridBlock enterClub(PeopleLocation myLocation) throws InterruptedException {
-
-
-			counter.personArrived(); // Add to counter of people waiting
-			counter.personEntered(); // Add to counter
-			while(counter.getInside()== counter.getMax()){}
-			myLocation.setLocation(entrance);
-			myLocation.setInRoom(true);
-
-
+		counter.personArrived(); //add to counter of people waiting
+		synchronized (entrance){
+		entrance.get(myLocation.getID());
+		while(counter.getInside()== counter.getMax()){}
+		//enter.lock();
+		counter.personEntered(); //add to counter
+		myLocation.setLocation(entrance);
+		myLocation.setInRoom(true);}
+		//enter.unlock();*/
 		return entrance;
 	}
-
-
-
-
-
-	public synchronized GridBlock move(GridBlock currentBlock,int step_x, int step_y,PeopleLocation myLocation) throws InterruptedException {  //try to move in
+	
+	
+	public GridBlock move(GridBlock currentBlock,int step_x, int step_y,PeopleLocation myLocation) throws InterruptedException {  //try to move in 
 		
 		int c_x= currentBlock.getX();
 		int c_y= currentBlock.getY();
@@ -114,27 +109,22 @@ public class ClubGrid {
 		if ((new_x==currentBlock.getX())&&(new_y==currentBlock.getY())) //not actually moving
 			return currentBlock;
 		 
-
-
 		GridBlock newBlock = Blocks[new_x][new_y];
-
+		
 		if (!newBlock.get(myLocation.getID())) return currentBlock; //stay where you are
-
+			
 		currentBlock.release(); //must release current block
 		myLocation.setLocation(newBlock);
-
 		return newBlock;
-
 	} 
 	
-//Synchronized the leaveClub because it is accessing shared resources like PeopleCounter, PeopleLocation, GridBlock
-	public synchronized void leaveClub(GridBlock currentBlock,PeopleLocation myLocation)   {
+
+	public  void leaveClub(GridBlock currentBlock,PeopleLocation myLocation)   {
 			currentBlock.release();
 			counter.personLeft(); //add to counter
 			myLocation.setInRoom(false);
 			entrance.notifyAll();
 	}
-
 
 	public GridBlock getExit() {
 		return exit;

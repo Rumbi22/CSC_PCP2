@@ -18,7 +18,7 @@ public class PeopleCounter {
 		return peopleOutSide.get();
 	}
 
-	public synchronized int getInside() {
+	public int getInside() {
 		return peopleInside.get();
 	}
 	
@@ -40,13 +40,13 @@ public class PeopleCounter {
 	}
 	
 	//someone got inside
-	public void personEntered() {
+	synchronized public void personEntered() {
 		peopleOutSide.getAndDecrement();
 		peopleInside.getAndIncrement();
 	}
 
 	//someone left
-	public synchronized void personLeft() {
+	synchronized public void personLeft() {
 		peopleInside.getAndDecrement();
 		peopleLeft.getAndIncrement();
 		

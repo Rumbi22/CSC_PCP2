@@ -1,20 +1,16 @@
 package clubSimulation;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 // GridBlock class to represent a block in the club.
 // only one thread at a time "owns" a GridBlock
 
 public class GridBlock {
 	private int isOccupied; 
-	private final boolean isExit;  //is this the exit door?
+	private final boolean isExit;  //is tthis the exit door?
 	private final boolean isBar; //is it a bar block?
 	private final boolean isDance; //is it the dance area?
 	private int [] coords; // the coordinate of the block.
-
-	private Lock gridlock= new ReentrantLock();
 	
 	GridBlock(boolean exitBlock, boolean barBlock, boolean danceBlock) throws InterruptedException {
 		isExit=exitBlock;
@@ -28,39 +24,27 @@ public class GridBlock {
 		coords = new int [] {x,y};
 	}
 	
-	public synchronized int getX() {return coords[0];}
+	public  int getX() {return coords[0];}  
 	
-	public synchronized int getY() {return coords[1];}
-
-
-	//Use of lock to make sure one thread has access to a block.
-	public boolean get(int threadID) throws InterruptedException {
-		gridlock.lock();
-		try {
-			if (isOccupied == threadID) {
-				return true; // thread Already in this block
-			}
-			if (isOccupied >= 0) {
-				return false; // space is occupied
-			}
-			isOccupied = threadID; // set ID to thread that had block
-			return true;
-		} finally {
-			gridlock.unlock(); // Ensure the lock is always released
-		}
+	public  int getY() {return coords[1];}
+	
+	public  boolean get(int threadID) throws InterruptedException {
+		if (isOccupied==threadID) return true; //thread Already in this block
+		if (isOccupied>=0) return false; //space is occupied
+		isOccupied=threadID;  //set ID to thread that had block
+		return true;
 	}
-
-
-	public  void release() {
+		
+	public void release() {
 		isOccupied=-1;
 	}
 	
-	public  synchronized boolean occupied() {
+	public  boolean occupied() {
 		if(isOccupied==-1) return false;
 		return true;
 	}
 	
-	public synchronized boolean isExit() {
+	public boolean isExit() {
 		return isExit;	
 	}
 

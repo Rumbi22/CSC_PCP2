@@ -2,8 +2,6 @@
 
 package clubSimulation;
 // the main class, starts all threads
-import jdk.swing.interop.SwingInterOpUtils;
-
 import javax.swing.*;
 
 import java.awt.Color;
@@ -11,7 +9,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Random;
 import java.util.concurrent.*;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ClubSimulation {
@@ -28,15 +25,15 @@ public class ClubSimulation {
 	
 	static PeopleCounter tallys; //counters for number of people inside and outside club
 
+	public static CountDownLatch startButton= new CountDownLatch(1);
+
+
 	static ClubView clubView; //threaded panel to display terrain
 	static ClubGrid clubGrid; // club grid
 	static CounterDisplay counterDisplay ; //threaded display of counters
 	
 	private static int maxWait=1200; //for the slowest customer
 	private static int minWait=500; //for the fastest cutomer
-
-	public static CountDownLatch startButton= new CountDownLatch(1);
-	public static CountDownLatch pauseButton= new CountDownLatch(1);
 
 	public static void setupGUI(int frameX,int frameY,int [] exits) {
 		// Frame initialize and dimensions
@@ -75,6 +72,7 @@ public class ClubSimulation {
 		startB.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e)  {
 			    	  	// THIS DOES NOTHING - MUST BE FIXED
+
 				System.out.println("Start button pressed.");
 				startButton.countDown();
 				//pauseButton = new CountDownLatch(0); // Reset the pauseLatch
@@ -83,9 +81,8 @@ public class ClubSimulation {
 
 
 			}
-		});
-
-
+		   });
+			
 			final JButton pauseB = new JButton("Pause ");;
 			
 			// add the listener to the jbutton to handle the "pressed" event
@@ -93,7 +90,6 @@ public class ClubSimulation {
 				private AtomicBoolean isPaused = new AtomicBoolean(false);
 		      public void actionPerformed(ActionEvent e) {
 		    		// THIS DOES NOTHING - MUST BE FIXED
-
 
 				  System.out.println("Pause button pressed.");
 				  if (isPaused.get()) {
@@ -114,12 +110,9 @@ public class ClubSimulation {
 						  patron.resumeSimulation();
 					  }
 				  }
-
-
-
-			  }
-			});
-
+		      }
+		    });
+			
 		JButton endB = new JButton("Quit");
 				// add the listener to the jbutton to handle the "pressed" event
 				endB.addActionListener(new ActionListener() {
@@ -154,8 +147,6 @@ public class ClubSimulation {
 		
 		//hardcoded exit doors
 		int [] exit = {0,(int) gridY/2-1};  //once-cell wide door on left
-
-
 				
 	    tallys = new PeopleCounter(max); //counters for people inside and outside club
 		clubGrid = new ClubGrid(gridX, gridY, exit,tallys); //setup club with size and exitsand maximum limit for people    
@@ -167,18 +158,13 @@ public class ClubSimulation {
 		Random rand = new Random();
 
         for (int i=0;i<noClubgoers;i++) {
-        		peopleLocations[i]=new PeopleLocation(i,tallys);
+        		peopleLocations[i]=new PeopleLocation(i);
         		int movingSpeed=(int)(Math.random() * (maxWait-minWait)+minWait); //range of speeds for customers
     			patrons[i] = new Clubgoer(i,peopleLocations[i],movingSpeed);
     		}
 		           
 		setupGUI(frameX, frameY,exit);  //Start Panel thread - for drawing animation
         //start all the threads
-		/*try {
-			startButton.await(); // Wait for the latch to be released
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}*/
 		Thread t = new Thread(clubView); 
       	t.start();
       	//Start counter thread - for updating counters

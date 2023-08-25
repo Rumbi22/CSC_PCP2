@@ -1,8 +1,6 @@
 package clubSimulation;
 
 import java.awt.Color;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.swing.JLabel;
 
@@ -14,8 +12,6 @@ public class CounterDisplay  implements Runnable {
 	JLabel waiting;
 	JLabel inside;
 	JLabel left;
-
-	private Lock counter= new ReentrantLock();
 		
 	CounterDisplay(JLabel w, JLabel i, JLabel l, PeopleCounter score) {
         this.waiting=w;
@@ -24,10 +20,8 @@ public class CounterDisplay  implements Runnable {
         this.score=score;
     }
 	
-	public synchronized void run() { //this thread just updates the display of the counters
+	public void run() { //this thread just updates the display of the counters
         while (true) {
-        	try{
-        		//counter.lock();
         	//test changes colour when at limit and over limit of people inside
         	if (score.getMax()<score.getInside()) {
         		inside.setForeground(Color.RED);
@@ -39,9 +33,6 @@ public class CounterDisplay  implements Runnable {
         	inside.setText("Inside: " + score.getInside() + "    "); 
             waiting.setText("Waiting:" +  score.getWaiting()+ "    " );
             left.setText("Left:" + score.getLeft()+ "    " ); 
-        }finally { //counter.unlock();
-
-			}
-			}
+        }
     }
 }
