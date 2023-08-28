@@ -92,38 +92,48 @@ public class ClubGrid {
 	}
 	
 	
-	public GridBlock move(GridBlock currentBlock,int step_x, int step_y,PeopleLocation myLocation) throws InterruptedException {  //try to move in 
-		
-		int c_x= currentBlock.getX();
-		int c_y= currentBlock.getY();
-		
-		int new_x = c_x+step_x; //new block x coordinates
-		int new_y = c_y+step_y; // new block y  coordinates
-		
-		//restrict i an j to grid
-		if (!inPatronArea(new_x,new_y)) {
-			//Invalid move to outside  - ignore
-			return currentBlock;
-		}
+	public  GridBlock move(GridBlock currentBlock,int step_x, int step_y,PeopleLocation myLocation) throws InterruptedException {  //try to move in
+		synchronized (currentBlock) {
+			int c_x = currentBlock.getX();
+			int c_y = currentBlock.getY();
 
-		if ((new_x==currentBlock.getX())&&(new_y==currentBlock.getY())) //not actually moving
-			return currentBlock;
-		 
-		GridBlock newBlock = Blocks[new_x][new_y];
-		
-		if (!newBlock.get(myLocation.getID())) return currentBlock; //stay where you are
-			
-		currentBlock.release(); //must release current block
-		myLocation.setLocation(newBlock);
-		return newBlock;
-	} 
+			int new_x = c_x + step_x; //new block x coordinates
+			int new_y = c_y + step_y; // new block y  coordinates
+
+			//restrict i an j to grid
+			if (!inPatronArea(new_x, new_y)) {
+				//Invalid move to outside  - ignore
+				return currentBlock;
+			}
+
+			if ((new_x == currentBlock.getX()) && (new_y == currentBlock.getY())) //not actually moving
+				return currentBlock;
+
+			GridBlock newBlock = Blocks[new_x][new_y];
+
+			if (!newBlock.get(myLocation.getID()))
+				return currentBlock; //stay where you are
+
+
+			currentBlock.release(); //must release current block
+			myLocation.setLocation(newBlock);
+
+
+			return newBlock;
+
+
+		}
+	}
 	
 
 	public  void leaveClub(GridBlock currentBlock,PeopleLocation myLocation)   {
-			currentBlock.release();
-			counter.personLeft(); //add to counter
-			myLocation.setInRoom(false);
-			entrance.notifyAll();
+
+		    synchronized (currentBlock) {
+				currentBlock.release();
+				counter.personLeft(); //add to counter
+				myLocation.setInRoom(false);
+				entrance.notifyAll();
+			}
 	}
 
 	public GridBlock getExit() {
